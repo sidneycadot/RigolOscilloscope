@@ -1,2 +1,6 @@
 This is a Python module for controlling the Rigol DS1102D oscilloscope.
 (It probably works on other Rigol scopes, too.)
+
+Currently, this code is a bit of a mess and woefully incomplete.
+
+Work in progress ...
