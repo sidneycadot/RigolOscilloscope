@@ -201,8 +201,8 @@ class RigolOscilloscope:
 
         assert response in ["NORMAL", "AVERAGE", "Peak Detect"]
 
+        # Handle different set/get values
         if response == "Peak Detect":
-            # Fix anomalous value
             response = "PEAKDETECT"
 
         return response
@@ -403,9 +403,9 @@ class RigolOscilloscope:
 
         return response
 
-    ### TIMEBASE commands
+    # TIMEBASE commands
 
-    def getTimebaseMode(self, value):
+    def setTimebaseMode(self, value):
 
         assert value in ["MAIN", "DELAYED"]
 
@@ -413,7 +413,7 @@ class RigolOscilloscope:
 
         return response
 
-    def timebase_mode_query(self):
+    def getTimebaseMode(self):
 
         response = self._execute(":TIMEBASE:MODE?", True)
 
@@ -461,7 +461,7 @@ class RigolOscilloscope:
 
         return response
 
-    def timebase_format_set(self, value):
+    def setTimebaseFormat(self, value):
 
         assert value in ["XY", "YT", "SCANNING"]
 
@@ -469,19 +469,17 @@ class RigolOscilloscope:
 
         return response
 
-    def timebase_format_query(self):
+    def getTimebaseFormat(self):
 
         response = self._execute(":TIMEBASE:FORMAT?", True)
 
         assert response in ["X-Y", "Y-T", "SCANNING"]
 
-        return response
-
-    def timebase_format_set(self, value):
-
-        assert value in ["XY", "YT", "SCANNING"]
-
-        response = self._execute(":TIMEBASE:FORMAT " + value, False)
+        # Handle different set/get values
+        if response == "X-Y":
+            response = "XY"
+        elif response == "Y-T":
+            response = "YT"
 
         return response
 

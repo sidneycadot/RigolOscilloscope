@@ -5,6 +5,8 @@ import os, serial, rigol, time
 def val2str(value):
     if isinstance(value, int):
         return "%d" % value
+    elif isinstance(value, float):
+        return "%f" % value
     elif isinstance(value, str):
         return "\"%s\"" % value
     else:
@@ -13,10 +15,10 @@ def val2str(value):
 
 def testAllGetterSetterValues(name, getter, setter, values):
 
-    dots = "".join("." * (24 - len(name)))
+    dots = "".join("." * (37 - len(name)))
 
     originalValue = getter()
-    print "    get%s() %s : %s" % (name, dots, val2str(originalValue))
+    print "    get%s %s : %s" % (name, dots, val2str(originalValue))
 
     if setter is not None:
 
@@ -26,11 +28,11 @@ def testAllGetterSetterValues(name, getter, setter, values):
 
         for progValue in progValues:
             setter(progValue)
-            print "    set%s() %s : %s" % (name, dots, val2str(progValue))
+            print "    set%s %s : %s" % (name, dots, val2str(progValue))
             # Note: we need to wait for >= 55 ms before the setting takes effect!!!
             #time.sleep(0.020)
             checkValue = getter()
-            print "    get%s() %s : %s" % (name, dots, val2str(checkValue))
+            print "    get%s %s : %s" % (name, dots, val2str(checkValue))
             assert progValue == checkValue
 
 def testGeneralCommands(scope):
@@ -40,64 +42,89 @@ def testGeneralCommands(scope):
 
     identity = scope.getIdentity()
 
-    print "    getIdentity() ................ : %s" % val2str(identity)
+    print "    getIdentity() ........................... : %s" % val2str(identity)
 
     scope.cmdReset()
 
-    print "    cmdReset() ................... : %s" % "ok"
+    print "    cmdReset() .............................. : %s" % "ok"
     print
 
 def testSystemCommands(scope):
 
-    scope.cmdSystemRun()
-    time.sleep(2)
-
-    print "    cmdSystemRun() ............... : %s" % "ok"
+    print "SYSTEM commands:"
     print
+
+    scope.cmdSystemRun()
+    time.sleep(0.200)
+
+    print "    cmdSystemRun() .......................... : %s" % "ok"
 
     scope.cmdSystemStop()
-    time.sleep(1)
+    time.sleep(0.200)
 
-    print "    cmdSystemStop() .............. : %s" % "ok"
-    print
+    print "    cmdSystemStop() ......................... : %s" % "ok"
 
     scope.cmdSystemAuto()
-    time.sleep(2)
+    time.sleep(0.200)
 
-    print "    cmdSystemAuto() .............. : %s" % "ok"
-    print
+    print "    cmdSystemAuto() ......................... : %s" % "ok"
 
     scope.cmdSystemHardcopy()
-    time.sleep(2)
+    time.sleep(0.200)
 
-    print "    cmdSystemHardcopy() .......... : %s" % "ok"
+    print "    cmdSystemHardcopy() ..................... : %s" % "ok"
+
+    scope.cmdSystemRun()
+    time.sleep(0.200)
+
+    print "    cmdSystemRun() .......................... : %s" % "ok"
+
     print
 
 def testAcquireCommands(scope):
 
-    testAllGetterSetterValues("AcquireType", scope.getAcquireType, scope.setAcquireType, ["NORMAL", "AVERAGE", "PEAKDETECT"])
-    testAllGetterSetterValues("AcquireMode", scope.getAcquireMode, scope.setAcquireMode, ["REAL_TIME", "EQUAL_TIME"])
-    testAllGetterSetterValues("AcquireAverages", scope.getAcquireAverages, scope.setAcquireAverages, [2, 4, 8, 16, 32, 64, 128, 256])
+    print "ACQUIRE commands:"
+    print
 
-    #testAllGetterSetterValues("AcquireSamplingRate(\"CHANNEL1\")", ch1, None, None)
-    #testAllGetterSetterValues("AcquireSamplingRate(\"CHANNEL2\")", ch2, None, None)
-    #testAllGetterSetterValues("AcquireSamplingRate(\"DIGITAL\")", digital, None, None)
+    testAllGetterSetterValues("AcquireType()", scope.getAcquireType, scope.setAcquireType, ["NORMAL", "AVERAGE", "PEAKDETECT"])
+    testAllGetterSetterValues("AcquireMode()", scope.getAcquireMode, scope.setAcquireMode, ["REAL_TIME", "EQUAL_TIME"])
+    testAllGetterSetterValues("AcquireAverages()", scope.getAcquireAverages, scope.setAcquireAverages, [2, 4, 8, 16, 32, 64, 128, 256])
+    testAllGetterSetterValues("AcquireSamplingRate(\"CHANNEL1\")", lambda : scope.getAcquireSamplingRate("CHANNEL1"), None, None)
+    testAllGetterSetterValues("AcquireSamplingRate(\"CHANNEL2\")", lambda : scope.getAcquireSamplingRate("CHANNEL2"), None, None)
+    testAllGetterSetterValues("AcquireSamplingRate(\"DIGITAL\")", lambda : scope.getAcquireSamplingRate("DIGITAL"), None, None)
+    testAllGetterSetterValues("AcquireMemDepth()", scope.getAcquireMemDepth, scope.setAcquireMemDepth, ["LONG", "NORMAL"])
 
-    testAllGetterSetterValues("AcquireMemDepth", scope.getAcquireMemDepth, scope.setAcquireMemDepth, ["LONG", "NORMAL"])
+    print
 
 def testDisplayCommands(scope):
 
-    testAllGetterSetterValues("DisplayType", scope.getDisplayType, scope.setDisplayType, ["VECTORS", "DOTS"])
-    testAllGetterSetterValues("DisplayGrid", scope.getDisplayGrid, scope.setDisplayGrid, ["FULL", "HALF", "NONE"])
-    testAllGetterSetterValues("DisplayPersist", scope.getDisplayPersist, scope.setDisplayPersist, ["ON", "OFF"])
-    testAllGetterSetterValues("DisplayMenuDisplay", scope.getDisplayMenuDisplay, scope.setDisplayMenuDisplay, ["1s", "2s", "5s", "10s", "20s", "Infinite"])
-    testAllGetterSetterValues("DisplayMenuStatus", scope.getDisplayMenuStatus, scope.setDisplayMenuStatus, ["ON", "OFF"])
+    print "DISPLAY commands:"
+    print
+
+    testAllGetterSetterValues("DisplayType()", scope.getDisplayType, scope.setDisplayType, ["VECTORS", "DOTS"])
+    testAllGetterSetterValues("DisplayGrid()", scope.getDisplayGrid, scope.setDisplayGrid, ["FULL", "HALF", "NONE"])
+    testAllGetterSetterValues("DisplayPersist()", scope.getDisplayPersist, scope.setDisplayPersist, ["ON", "OFF"])
+    testAllGetterSetterValues("DisplayMenuDisplay()", scope.getDisplayMenuDisplay, scope.setDisplayMenuDisplay, ["1s", "2s", "5s", "10s", "20s", "Infinite"])
+    testAllGetterSetterValues("DisplayMenuStatus()", scope.getDisplayMenuStatus, scope.setDisplayMenuStatus, ["ON", "OFF"])
 
     scope.cmdDisplayClear()
-    print "    cmdDisplayClear .............. : %s" % "ok"
+
+    print "    cmdDisplayClear ......................... : %s" % "ok"
 
     testAllGetterSetterValues("DisplayBrightness", scope.getDisplayBrightness, scope.setDisplayBrightness, range(0, 33))
     testAllGetterSetterValues("DisplayIntensity", scope.getDisplayIntensity, scope.setDisplayIntensity, range(0, 33))
+
+    print
+
+def testTimebaseCommands(scope):
+
+    print "TIMEBASE commands:"
+    print
+
+    testAllGetterSetterValues("TimebaseMode()", scope.getTimebaseMode, scope.setTimebaseMode, ["MAIN", "DELAYED"])
+    testAllGetterSetterValues("TimebaseFormat()", scope.getTimebaseFormat, scope.setTimebaseFormat, ["XY", "YT", "SCANNING"])
+
+    print
 
 def test(scope):
 
@@ -106,9 +133,9 @@ def test(scope):
 
     testGeneralCommands(scope)
     #testSystemCommands(scope)
-    testAcquireCommands(scope)
+    #testAcquireCommands(scope)
     #testDisplayCommands(scope)
-    #testTimebaseCommands(scope)
+    testTimebaseCommands(scope)
     #testTriggerCommands(scope)
     #testStorageCommands(scope)
     #testMathCommands(scope)
@@ -118,6 +145,7 @@ def test(scope):
     #testLogicalAnalyzerCommands(scope)
     #testKeyCommands(scope)
     #testOtherCommands(scope) # info, counter, beep
+
     for i in xrange(3):
         scope.cmdBeepAction()
         time.sleep(0.050)
@@ -129,7 +157,7 @@ def main():
     else:
         device = os.fdopen(os.open("/dev/usbtmc0", os.O_RDWR), "rw")
 
-    scope = rigol.RigolOscilloscope(device, verbosity = 1)
+    scope = rigol.RigolOscilloscope(device, verbosity = 0)
 
     test(scope)
 
