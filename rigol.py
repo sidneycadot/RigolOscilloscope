@@ -163,6 +163,8 @@ class RigolOscilloscope:
         """Perform a full reset of the oscilloscope."""
 
         return self._execute("*RST", False)
+        # We need to wait for a small period of time to make sure the scope will react predictably.
+        time.sleep(0.200)
 
     # SYSTEM commands
 
@@ -177,7 +179,6 @@ class RigolOscilloscope:
 
     def cmdSystemAuto(self):
 
-        assert False # Appears defunct
         return self._execute(":SYSTEM:AUTO", False)
 
     def cmdSystemHardcopy(self):
@@ -200,11 +201,21 @@ class RigolOscilloscope:
 
         assert response in ["NORMAL", "AVERAGE", "Peak Detect"]
 
+        if response == "Peak Detect":
+            # Fix anomalous value
+            response = "PEAKDETECT"
+
         return response
 
     def setAcquireMode(self, value):
 
-        assert value in ["RTIME", "ETIME"]
+        assert value in ["REAL_TIME", "EQUAL_TIME"]
+
+        # Handle different set/get values
+        if value == "REAL_TIME":
+            value = "RTIME"
+        elif value == "EQUAL_TIME":
+            value = "ETIME"
 
         response = self._execute(":ACQUIRE:MODE " + value, False)
 
